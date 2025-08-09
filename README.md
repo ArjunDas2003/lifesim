@@ -99,7 +99,7 @@ http://127.0.0.1:5000
 
 ## Project Documentation
 
-### Screenshots (Add at least 3)
+### Screenshots 
 
 ![WhatsApp Image 2025-08-09 at 14 55 58_75a3816c](https://github.com/user-attachments/assets/53106629-0dd2-4d63-834e-78630142babf)
 
