@@ -1,6 +1,262 @@
 <!-- templates/create_character.html -->
 {% extends "base.html" %}
 {% block content %}
+<style>
+    /* ===== CSS Variables for Theme ===== */
+    :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --secondary-color: #64748b;
+        --success-color: #059669;
+        --background: #f8fafc;
+        --card-bg: #ffffff;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --border-color: #e2e8f0;
+        --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --radius: 12px;
+    }
+
+    /* ===== Base Styles ===== */
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+
+    .form-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    /* ===== Modern Form Card ===== */
+    .modern-form {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 40px;
+        width: 100%;
+        max-width: 600px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .modern-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), #8b5cf6, #ec4899);
+    }
+
+    /* ===== Typography ===== */
+    .modern-form h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 8px 0;
+        line-height: 1.2;
+    }
+
+    .modern-form p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin: 0 0 32px 0;
+        line-height: 1.6;
+    }
+
+    /* ===== Form Groups ===== */
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    /* ===== Input Styles ===== */
+    .form-group input[type="text"],
+    .form-group select {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #ffffff;
+        box-sizing: border-box;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-group input[type="text"]::placeholder {
+        color: #94a3b8;
+    }
+
+    /* ===== Selection Header ===== */
+    .selection-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    /* ===== Perk Selection Grid ===== */
+    .selection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .selection-item {
+        padding: 16px 20px;
+        background: #f1f5f9;
+        border: 2px solid transparent;
+        border-radius: var(--radius);
+        text-align: center;
+        font-weight: 500;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        position: relative;
+    }
+
+    .selection-item:hover {
+        background: #e2e8f0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .selection-item.selected {
+        background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+        color: white;
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+    }
+
+    .selection-item.selected::after {
+        content: '✓';
+        position: absolute;
+        top: 4px;
+        right: 8px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    /* ===== Button Styles ===== */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 20px;
+        border: none;
+        border-radius: var(--radius);
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+
+    .btn-sm {
+        background: #f1f5f9;
+        color: var(--text-secondary);
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-sm:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+        color: white;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-hover), #7c3aed);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-full {
+        width: 100%;
+        padding: 16px;
+        font-size: 1.1rem;
+        margin-top: 16px;
+    }
+
+    /* ===== Responsive Design ===== */
+    @media (max-width: 768px) {
+        .modern-form {
+            padding: 24px;
+            margin: 10px;
+        }
+        
+        .selection-grid {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+        }
+        
+        .modern-form h2 {
+            font-size: 1.75rem;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .modern-form {
+            max-width: 700px;
+        }
+        
+        .selection-grid {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+    }
+
+    /* ===== Smooth Animations ===== */
+    .modern-form {
+        animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
 <div class="form-container">
     <form method="POST" action="{{ url_for('create_character') }}" id="creationForm" class="modern-form">
         <h2>Create Your Character</h2>

@@ -385,30 +385,66 @@ def end_life(character_id):
 def advance_year(character_id):
     character = Character.query.get_or_404(character_id)
     if character.user_id != current_user.id or not character.is_alive: return redirect(url_for('dashboard'))
+
+    # --- START OF MODIFICATION ---
+    # Increment age at the beginning of the turn
+    character.age += 1
+    db.session.commit()
+
+    # Check for death by old age if character is 60 or older
+    if character.age >= 60:
+        # The probability of death increases by 2.5% for each year over 59.
+        # at 60, probability is 2.5%
+        # at 70, probability is 27.5%
+        # at 100, probability is 102.5% (guaranteed death)
+        death_probability = (character.age - 59) * 0.025
+        if random.random() < death_probability:
+            character.is_alive = False
+            # Add a life event for the death
+            db.session.add(LifeEvent(character_id=character.id, year=character.age, summary=f"{character.name} passed away of natural causes at the age of {character.age}."))
+            db.session.commit()
+            flash(f"{character.name} has passed away at {character.age} years old.", "info")
+            return redirect(url_for('life_view', character_id=character.id))
+    # --- END OF MODIFICATION ---
+
     latest_attributes = Attribute.query.filter_by(character_id=character.id).order_by(Attribute.year.desc()).first()
+    
+    # Modified prompt to inform the AI about the age-based death mechanic
     prompt1_data = {
         "task": "advance_year_narrative",
-        "instruction": "You are a life simulator AI. The narrative summary MUST be realistic for the character's specific age. A 6-year-old starts school, a 90-year-old retires.",
+        "instruction": f"You are a life simulator AI. The narrative summary MUST be realistic for the character's specific age. A 6-year-old starts school, a 90-year-old retires. The character is now {character.age} years old. Note that there's an increasing chance of natural death after age 60, which is handled by the game logic.",
         "character_details": { "name": character.name, "age": character.age, "attributes": { "health": latest_attributes.health, "wealth": latest_attributes.wealth, "happiness": latest_attributes.happiness, "karma": latest_attributes.karma, "iq": latest_attributes.iq } },
         "life_history": get_full_history(character),
         "player_choices": request.form.getlist('choices'),
-        "response_schema": { "summary": "A 5-8 sentence summary for the next year.", "is_deceased": "A boolean (true/false) indicating if the character died this year." }
+        "response_schema": { "summary": "A 5-8 sentence summary for the next year.", "is_deceased": "A boolean (true/false) indicating if the character died this year from events in the narrative (not old age)." }
     }
+
     narrative_json = call_gemini_api(prompt1_data)
     if not narrative_json:
-        flash("The story could not continue. Please try again.", "danger"); return redirect(url_for('life_view', character_id=character_id))
+        flash("The story could not continue. Please try again.", "danger")
+        character.age -=1 # Revert age increment on failure
+        db.session.commit()
+        return redirect(url_for('life_view', character_id=character_id))
+
     try:
         next_year_summary = narrative_json['summary']
-        is_deceased = narrative_json['is_deceased']
-        character.age += 1
+        is_deceased_from_event = narrative_json.get('is_deceased', False)
+
         db.session.add(LifeEvent(character_id=character.id, year=character.age, summary=next_year_summary))
         db.session.commit()
-        if is_deceased:
-            character.is_alive = False; latest_attributes.health = 0; db.session.commit()
+
+        if is_deceased_from_event:
+            character.is_alive = False
+            if latest_attributes:
+                latest_attributes.health = 0
+            db.session.commit()
             flash(f"{character.name} has passed away at the age of {character.age}.", "info")
-            return redirect(url_for('life_view', character_id=character_id))
+            return redirect(url_for('life_view', character_id=character.id))
     except KeyError:
-        flash("Received an invalid story format from the AI.", "danger"); return redirect(url_for('life_view', character_id=character_id))
+        flash("Received an invalid story format from the AI.", "danger")
+        character.age -=1 # Revert age increment on failure
+        db.session.commit()
+        return redirect(url_for('life_view', character_id=character_id))
     
     prompt2_data = {
         "task": "evaluate_attributes_and_score", "narrative": next_year_summary,
@@ -440,6 +476,7 @@ def advance_year(character_id):
                 flash(f"{character.name} has passed away at the age of {character.age}.", "info")
                 return redirect(url_for('life_view', character_id=character.id))
         except (TypeError, KeyError, ValueError): pass
+    
     generate_turn_results(character, new_attributes, get_full_history(character))
     return redirect(url_for('life_view', character_id=character.id))
 

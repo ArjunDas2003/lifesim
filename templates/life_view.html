@@ -1,6 +1,572 @@
 <!-- templates/life_view.html -->
 {% extends "base.html" %}
 {% block content %}
+<style>
+    /* ===== CSS Variables for Consistent Theming ===== */
+    :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --secondary-color: #64748b;
+        --success-color: #059669;
+        --warning-color: #d97706;
+        --danger-color: #dc2626;
+        --info-color: #0891b2;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --card-bg: #ffffff;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --border-color: #e2e8f0;
+        --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --radius: 12px;
+        --radius-large: 16px;
+    }
+
+    /* ===== Base Layout ===== */
+    body {
+        background: var(--background);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    .life-view-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        min-height: 100vh;
+        animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== Header Styling ===== */
+    .life-header {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-large);
+        box-shadow: var(--shadow-medium);
+        padding: 24px 32px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .life-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--info-color), var(--primary-color), #8b5cf6);
+    }
+
+    .life-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0;
+        background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .age-badge {
+        background: linear-gradient(135deg, var(--info-color), #0891b2);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+    }
+
+    /* ===== Button Styles ===== */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 20px;
+        border: none;
+        border-radius: var(--radius);
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        box-sizing: border-box;
+        gap: 8px;
+    }
+
+    .btn {
+        background: #f1f5f9;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+        color: white;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-hover), #7c3aed);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-logout {
+        background: linear-gradient(135deg, var(--danger-color), #dc2626);
+        color: white;
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-logout:hover {
+        background: linear-gradient(135deg, #b91c1c, #991b1b);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    .btn-full {
+        width: 100%;
+        padding: 14px;
+        margin-top: 16px;
+    }
+
+    /* ===== Life Layout ===== */
+    .life-layout {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* ===== Attributes Panel ===== */
+    .attributes-panel {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-large);
+        box-shadow: var(--shadow-medium);
+        padding: 24px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .attributes-panel h3,
+    .attributes-panel h4 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .attributes-panel h3::before {
+        content: '👤';
+        font-size: 20px;
+    }
+
+    .attributes-panel h4:nth-of-type(2)::before {
+        content: '✨';
+        font-size: 18px;
+    }
+
+    .attributes-panel h4:nth-of-type(3)::before {
+        content: '🏆';
+        font-size: 18px;
+    }
+
+    .attributes-panel h4:last-of-type::before {
+        content: '💀';
+        font-size: 18px;
+    }
+
+    .attributes-list {
+        margin-bottom: 32px;
+    }
+
+    .attribute-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+    }
+
+    .attribute-item:last-child {
+        border-bottom: none;
+    }
+
+    .attribute-item span:first-child {
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .value {
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .score-value {
+        background: linear-gradient(135deg, var(--success-color), #059669);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.1rem;
+    }
+
+    .attributes-list hr {
+        border: none;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), #8b5cf6);
+        margin: 16px 0;
+        border-radius: 2px;
+    }
+
+    /* ===== Lists Styling ===== */
+    .perks-list,
+    .achievements-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 32px 0;
+    }
+
+    .perks-list li {
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        border: 1px solid var(--border-color);
+        padding: 8px 12px;
+        border-radius: var(--radius);
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .achievements-list li {
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(5, 150, 105, 0.05));
+        border: 1px solid rgba(5, 150, 105, 0.2);
+        color: var(--success-color);
+        padding: 10px 12px;
+        border-radius: var(--radius);
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .no-items {
+        color: var(--text-secondary);
+        font-style: italic;
+        margin: 0 0 32px 0;
+        text-align: center;
+        padding: 16px;
+        background: #f8fafc;
+        border-radius: var(--radius);
+    }
+
+    /* ===== End Life Section ===== */
+    .end-life-section {
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.05));
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        border-radius: var(--radius);
+        padding: 20px;
+    }
+
+    .end-life-section p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 8px 0 0 0;
+        line-height: 1.5;
+    }
+
+    /* ===== Story Panel ===== */
+    .story-panel {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-large);
+        box-shadow: var(--shadow-medium);
+        padding: 32px;
+    }
+
+    .story-panel h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 24px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .story-panel h2::before {
+        content: '📖';
+        font-size: 28px;
+    }
+
+    /* ===== Events Log ===== */
+    .events-log {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: 32px;
+        padding-right: 8px;
+    }
+
+    .event-entry {
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        border-left: 4px solid var(--info-color);
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .event-entry:hover {
+        background: #f1f5f9;
+        border-left-color: var(--primary-color);
+        transform: translateX(4px);
+        box-shadow: var(--shadow-light);
+    }
+
+    .event-entry h4 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0 0 8px 0;
+    }
+
+    .event-entry p {
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    /* ===== Choices Section ===== */
+    .choices-section {
+        border-top: 2px solid var(--border-color);
+        padding-top: 32px;
+    }
+
+    .choices-section h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .choices-section h3::before {
+        content: '🤔';
+        font-size: 24px;
+    }
+
+    .choices-section p {
+        color: var(--text-secondary);
+        margin: 0 0 24px 0;
+        line-height: 1.6;
+    }
+
+    .selection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .selection-item {
+        padding: 16px 20px;
+        background: #f1f5f9;
+        border: 2px solid transparent;
+        border-radius: var(--radius);
+        text-align: center;
+        font-weight: 500;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        position: relative;
+    }
+
+    .selection-item:hover {
+        background: #e2e8f0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .selection-item.selected {
+        background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+        color: white;
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+    }
+
+    .selection-item.selected::after {
+        content: '✓';
+        position: absolute;
+        top: 4px;
+        right: 8px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    /* ===== End of Life Section ===== */
+    .end-of-life {
+        text-align: center;
+        background: linear-gradient(135deg, rgba(100, 116, 139, 0.1), rgba(100, 116, 139, 0.05));
+        border: 1px solid rgba(100, 116, 139, 0.2);
+        border-radius: var(--radius-large);
+        padding: 40px;
+    }
+
+    .end-of-life h3::before {
+        content: '🕊️';
+    }
+
+    .end-of-life p {
+        font-size: 1.1rem;
+        margin-bottom: 24px;
+    }
+
+    /* ===== Scrollbar Styling ===== */
+    .events-log::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .events-log::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .events-log::-webkit-scrollbar-thumb {
+        background: var(--secondary-color);
+        border-radius: 3px;
+    }
+
+    .events-log::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+    }
+
+    /* ===== Animations ===== */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .event-entry {
+        animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    .event-entry:nth-child(1) { animation-delay: 0.1s; }
+    .event-entry:nth-child(2) { animation-delay: 0.15s; }
+    .event-entry:nth-child(3) { animation-delay: 0.2s; }
+    .event-entry:nth-child(4) { animation-delay: 0.25s; }
+    .event-entry:nth-child(5) { animation-delay: 0.3s; }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* ===== Responsive Design ===== */
+    @media (max-width: 1024px) {
+        .life-layout {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .attributes-panel {
+            position: static;
+            order: 2;
+        }
+
+        .story-panel {
+            order: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .life-view-container {
+            padding: 16px;
+        }
+
+        .life-header {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .life-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .attributes-panel,
+        .story-panel {
+            padding: 20px;
+        }
+
+        .selection-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .events-log {
+            max-height: 300px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .life-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .header-actions {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .selection-item {
+            padding: 12px 16px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
 <div class="life-view-container">
     <header class="life-header">
         <h1>{{ character.name }}'s Life</h1>

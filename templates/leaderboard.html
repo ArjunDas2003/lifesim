@@ -1,6 +1,379 @@
 <!-- templates/leaderboard.html -->
 {% extends "base.html" %}
 {% block content %}
+<style>
+    /* ===== CSS Variables for Consistent Theming ===== */
+    :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --secondary-color: #64748b;
+        --success-color: #059669;
+        --warning-color: #d97706;
+        --danger-color: #dc2626;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --card-bg: #ffffff;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --border-color: #e2e8f0;
+        --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --radius: 12px;
+        --radius-large: 16px;
+    }
+
+    /* ===== Base Layout ===== */
+    body {
+        background: var(--background);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    .leaderboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        min-height: 100vh;
+        animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== Header Styling ===== */
+    .leaderboard-header {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-large);
+        box-shadow: var(--shadow-medium);
+        padding: 32px;
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .leaderboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--warning-color), #f59e0b, #eab308);
+    }
+
+    .leaderboard-header h2 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: linear-gradient(135deg, var(--warning-color), #f59e0b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .leaderboard-header h2::before {
+        content: '🏆';
+        font-size: 2.5rem;
+        background: none;
+        -webkit-text-fill-color: initial;
+    }
+
+    /* ===== Button Styling ===== */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 24px;
+        border: none;
+        border-radius: var(--radius);
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        box-sizing: border-box;
+        background: #f1f5f9;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        gap: 8px;
+    }
+
+    .btn:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .btn::before {
+        content: '🏠';
+        font-size: 16px;
+    }
+
+    /* ===== Table Container ===== */
+    .leaderboard-table {
+        width: 100%;
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-large);
+        box-shadow: var(--shadow-medium);
+        overflow: hidden;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    /* ===== Table Header ===== */
+    .leaderboard-table thead {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .leaderboard-table th {
+        padding: 20px 24px;
+        text-align: left;
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .leaderboard-table th:first-child {
+        text-align: center;
+        width: 80px;
+    }
+
+    .leaderboard-table th:last-child {
+        text-align: right;
+    }
+
+    /* ===== Table Body ===== */
+    .leaderboard-table tbody tr {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+    }
+
+    .leaderboard-table tbody tr:hover {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .leaderboard-table tbody tr:nth-child(1) {
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 193, 7, 0.05));
+        border-left: 4px solid #ffd700;
+    }
+
+    .leaderboard-table tbody tr:nth-child(2) {
+        background: linear-gradient(135deg, rgba(192, 192, 192, 0.1), rgba(169, 169, 169, 0.05));
+        border-left: 4px solid #c0c0c0;
+    }
+
+    .leaderboard-table tbody tr:nth-child(3) {
+        background: linear-gradient(135deg, rgba(205, 127, 50, 0.1), rgba(184, 115, 51, 0.05));
+        border-left: 4px solid #cd7f32;
+    }
+
+    /* ===== Table Cells ===== */
+    .leaderboard-table td {
+        padding: 20px 24px;
+        color: var(--text-secondary);
+        font-size: 1rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+    }
+
+    .leaderboard-table td:first-child {
+        text-align: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--text-primary);
+        position: relative;
+    }
+
+    .leaderboard-table td:last-child {
+        text-align: right;
+        font-weight: 700;
+        color: var(--success-color);
+        font-size: 1.1rem;
+    }
+
+    /* ===== Rank Medals ===== */
+    .leaderboard-table tbody tr:nth-child(1) td:first-child::after {
+        content: '🥇';
+        position: absolute;
+        right: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+    }
+
+    .leaderboard-table tbody tr:nth-child(2) td:first-child::after {
+        content: '🥈';
+        position: absolute;
+        right: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+    }
+
+    .leaderboard-table tbody tr:nth-child(3) td:first-child::after {
+        content: '🥉';
+        position: absolute;
+        right: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+    }
+
+    /* ===== Player Names Styling ===== */
+    .leaderboard-table tbody td:nth-child(2) {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .leaderboard-table tbody td:nth-child(3) {
+        font-style: italic;
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    /* ===== Empty State ===== */
+    .leaderboard-container p {
+        text-align: center;
+        padding: 60px 40px;
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-large);
+        box-shadow: var(--shadow-medium);
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        margin: 0;
+        position: relative;
+    }
+
+    .leaderboard-container p::before {
+        content: '🏆';
+        font-size: 64px;
+        display: block;
+        margin-bottom: 16px;
+        opacity: 0.3;
+    }
+
+    /* ===== Animations ===== */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .leaderboard-table tbody tr {
+        animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    .leaderboard-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+    .leaderboard-table tbody tr:nth-child(2) { animation-delay: 0.15s; }
+    .leaderboard-table tbody tr:nth-child(3) { animation-delay: 0.2s; }
+    .leaderboard-table tbody tr:nth-child(4) { animation-delay: 0.25s; }
+    .leaderboard-table tbody tr:nth-child(5) { animation-delay: 0.3s; }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* ===== Responsive Design ===== */
+    @media (max-width: 768px) {
+        .leaderboard-container {
+            padding: 16px;
+        }
+
+        .leaderboard-header {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .leaderboard-header h2 {
+            font-size: 2rem;
+        }
+
+        .leaderboard-table {
+            font-size: 0.85rem;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 12px 16px;
+        }
+
+        .leaderboard-table th:nth-child(4),
+        .leaderboard-table td:nth-child(4) {
+            display: none; /* Hide age column on mobile */
+        }
+    }
+
+    @media (max-width: 480px) {
+        .leaderboard-table th:nth-child(3),
+        .leaderboard-table td:nth-child(3) {
+            display: none; /* Hide character name on very small screens */
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 10px 12px;
+        }
+    }
+
+    /* ===== Scroll Enhancement ===== */
+    .leaderboard-table {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .leaderboard-table::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .leaderboard-table::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .leaderboard-table::-webkit-scrollbar-thumb {
+        background: var(--secondary-color);
+        border-radius: 4px;
+    }
+
+    .leaderboard-table::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+    }
+</style>
 <div class="leaderboard-container">
     <div class="leaderboard-header">
         <h2>Global Leaderboard</h2>

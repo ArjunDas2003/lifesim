@@ -1,6 +1,387 @@
 <!-- templates/dashboard.html -->
 {% extends "base.html" %}
 {% block content %}
+<style>
+    /* ===== CSS Variables for Consistent Theming ===== */
+    :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --secondary-color: #64748b;
+        --success-color: #059669;
+        --danger-color: #dc2626;
+        --warning-color: #d97706;
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --card-bg: #ffffff;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --border-color: #e2e8f0;
+        --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --radius: 12px;
+        --radius-large: 16px;
+    }
+
+    /* ===== Base Layout ===== */
+    body {
+        background: var(--background);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    .main-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        min-height: 100vh;
+    }
+
+    /* ===== Header Styling ===== */
+    .main-header {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-large);
+        box-shadow: var(--shadow-medium);
+        padding: 24px 32px;
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), #8b5cf6, #ec4899);
+    }
+
+    .main-header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0;
+        background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .user-info span {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    /* ===== Button Styles ===== */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 24px;
+        border: none;
+        border-radius: var(--radius);
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        box-sizing: border-box;
+        gap: 8px;
+    }
+
+    .btn-logout {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-logout:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-logout::after {
+        content: '🚪';
+        font-size: 16px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+        color: white;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-hover), #7c3aed);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn:hover {
+        background: #f1f5f9;
+        color: var(--text-primary);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    /* ===== Dashboard Grid ===== */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 24px;
+        margin-bottom: 48px;
+    }
+
+    .dashboard-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-large);
+        box-shadow: var(--shadow-medium);
+        padding: 32px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-large);
+    }
+
+    .dashboard-card h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 12px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .dashboard-card p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.6;
+        margin: 0 0 24px 0;
+    }
+
+    .create-life-card {
+        border-left: 4px solid var(--success-color);
+    }
+
+    .create-life-card h2::before {
+        content: '✨';
+        font-size: 24px;
+    }
+
+    .leaderboard-link-card {
+        border-left: 4px solid var(--warning-color);
+    }
+
+    .leaderboard-link-card h2::before {
+        content: '🏆';
+        font-size: 24px;
+    }
+
+    /* ===== Saves Sections ===== */
+    .saves-section {
+        margin-bottom: 40px;
+    }
+
+    .saves-section h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--card-bg);
+        margin: 0 0 24px 0;
+        padding: 16px 24px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: var(--radius);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .saves-section h2::before {
+        content: '⚡';
+        font-size: 24px;
+    }
+
+    .saves-section:last-child h2::before {
+        content: '💀';
+    }
+
+    .saves-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    /* ===== Save Cards ===== */
+    .save-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-light);
+        padding: 24px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .save-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-medium);
+        border-color: var(--primary-color);
+    }
+
+    .save-card h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 8px 0;
+    }
+
+    .save-card p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin: 0 0 12px 0;
+    }
+
+    /* ===== Status Indicators ===== */
+    .status-alive,
+    .status-dead {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        gap: 6px;
+    }
+
+    .status-alive {
+        background: rgba(5, 150, 105, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .status-alive::before {
+        content: '●';
+        color: var(--success-color);
+        animation: pulse 2s infinite;
+    }
+
+    .status-dead {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .status-dead::before {
+        content: '●';
+        color: var(--danger-color);
+    }
+
+    /* ===== Animations ===== */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .main-container {
+        animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ===== Responsive Design ===== */
+    @media (max-width: 768px) {
+        .main-container {
+            padding: 16px;
+        }
+
+        .main-header {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .main-header h1 {
+            font-size: 2rem;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .dashboard-card {
+            padding: 24px;
+        }
+
+        .saves-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .saves-grid {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+    }
+
+    /* ===== Empty State Styling ===== */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--card-bg);
+        opacity: 0.8;
+    }
+
+    .empty-state::before {
+        content: '🎭';
+        font-size: 48px;
+        display: block;
+        margin-bottom: 16px;
+    }
+</style>
 <div class="main-container">
     <header class="main-header">
         <h1>Life Simulator</h1>
