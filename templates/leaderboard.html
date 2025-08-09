@@ -1,0 +1,36 @@
+<!-- templates/leaderboard.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="leaderboard-container">
+    <div class="leaderboard-header">
+        <h2>Global Leaderboard</h2>
+        <a href="{{ url_for('dashboard') }}" class="btn">Back to Dashboard</a>
+    </div>
+    {% if leaderboard %}
+    <table class="leaderboard-table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Character</th>
+                <th>Age at Death</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in leaderboard %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ entry.player_name }}</td>
+                <td>{{ entry.character_name }}</td>
+                <td>{{ entry.age }}</td>
+                <td>{{ "{:,}".format(entry.score) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No lives have been completed yet. Be the first!</p>
+    {% endif %}
+</div>
+{% endblock %}

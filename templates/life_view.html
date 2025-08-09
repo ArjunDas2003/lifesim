@@ -1,0 +1,145 @@
+<!-- templates/life_view.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="life-view-container">
+    <header class="life-header">
+        <h1>{{ character.name }}'s Life</h1>
+        <div class="header-actions">
+            <span class="age-badge">Age: {{ character.age }}</span>
+            <a href="{{ url_for('dashboard') }}" class="btn">Dashboard</a>
+        </div>
+    </header>
+
+    <div class="life-layout">
+        <aside class="attributes-panel">
+            <h3>Profile</h3>
+            <div class="attributes-list">
+                <div class="attribute-item"><span>Total Score</span><span class="value score-value">{{ "{:,}".format(character.score) }}</span></div>
+                <hr>
+                <div class="attribute-item"><span>Health</span><span class="value">{{ attributes.health }}/100</span></div>
+                <div class="attribute-item"><span>Wealth</span><span class="value">${{ "{:,.0f}".format(attributes.wealth) }}</span></div>
+                <div class="attribute-item"><span>Happiness</span><span class="value">{{ attributes.happiness }}%</span></div>
+                <div class="attribute-item"><span>Karma</span><span class="value">{{ attributes.karma }}</span></div>
+                <div class="attribute-item"><span>IQ</span><span class="value">{{ attributes.iq }}</span></div>
+            </div>
+            
+            <h4>Perks</h4>
+            <ul class="perks-list">
+                {% for perk in character.perks %}
+                <li>{{ perk.name }}</li>
+                {% endfor %}
+            </ul>
+
+            <h4>Achievements</h4>
+            {% if achievements %}
+            <ul class="achievements-list">
+                {% for achievement in achievements %}
+                <li>🏆 {{ achievement.description }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="no-items">None yet.</p>
+            {% endif %}
+
+            {% if character.is_alive %}
+            <div class="end-life-section">
+                <h4>End Life</h4>
+                <p>Conclude this character's story and submit their final score to the leaderboard.</p>
+                <form id="endLifeForm" action="{{ url_for('end_life', character_id=character.id) }}" method="POST">
+                    <button type="submit" class="btn btn-logout btn-full">End Life Now</button>
+                </form>
+            </div>
+            {% endif %}
+        </aside>
+
+        <main class="story-panel">
+            <h2>Life Events</h2>
+            <div class="events-log">
+                {% for event in character.events|sort(attribute='year', reverse=True) %}
+                <div class="event-entry">
+                    <h4>Year {{ event.year }}</h4>
+                    <p>{{ event.summary }}</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if character.is_alive %}
+            <div class="choices-section">
+                <h3>What will you do next?</h3>
+                <p>Your choices will shape the coming year. Choose up to 3.</p>
+                <form action="{{ url_for('advance_year', character_id=character.id) }}" method="POST" id="choicesForm">
+                    <div class="selection-grid" id="choicesGrid">
+                        {% for choice in choices %}
+                        <div class="selection-item" data-value="{{ choice }}">{{ choice }}</div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Confirm Choices for Next Year</button>
+                </form>
+            </div>
+            {% else %}
+            <div class="choices-section end-of-life">
+                <h3>The End of a Life</h3>
+                <p>{{ character.name }}'s story has concluded. Their final score of {{ "{:,}".format(character.score) }} is now on the leaderboard.</p>
+                <a href="{{ url_for('leaderboard') }}" class="btn">View Leaderboard</a>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Script for choice selection
+    const choicesForm = document.getElementById('choicesForm');
+    if (choicesForm) {
+        const grid = document.getElementById('choicesGrid');
+        const maxSelections = 3;
+
+        grid.addEventListener('click', function(event) {
+            if (event.target.classList.contains('selection-item')) {
+                const selectedItems = grid.querySelectorAll('.selection-item.selected');
+                if (event.target.classList.contains('selected')) {
+                    event.target.classList.remove('selected');
+                } else {
+                    if (selectedItems.length < maxSelections) {
+                        event.target.classList.add('selected');
+                    } else {
+                        alert(`You can only select up to ${maxSelections} choices.`);
+                    }
+                }
+            }
+        });
+
+        choicesForm.addEventListener('submit', function(event) {
+            choicesForm.querySelectorAll('input[name="choices"]').forEach(input => input.remove());
+            const selectedItems = grid.querySelectorAll('.selection-item.selected');
+            
+            if (selectedItems.length === 0) {
+                alert('You must make at least one choice to continue.');
+                event.preventDefault();
+                return;
+            }
+
+            selectedItems.forEach(item => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'choices';
+                hiddenInput.value = item.dataset.value;
+                choicesForm.appendChild(hiddenInput);
+            });
+        });
+    }
+
+    // Script for End Life confirmation
+    const endLifeForm = document.getElementById('endLifeForm');
+    if(endLifeForm) {
+        endLifeForm.addEventListener('submit', function(event) {
+            const confirmation = confirm('Are you sure you want to end this character\'s life? This action cannot be undone.');
+            if (!confirmation) {
+                event.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

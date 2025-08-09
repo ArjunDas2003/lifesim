@@ -1,0 +1,118 @@
+/* static/css/style.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+:root {
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --secondary-color: #111827;
+    --text-color: #374151;
+    --light-text: #6b7280;
+    --bg-color: #f9fafb;
+    --card-bg: #ffffff;
+    --border-color: #e5e7eb;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --info-color: #3b82f6;
+    --warning-color: #f59e0b;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+}
+
+.container, .main-container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+/* --- Buttons --- */
+.btn { display: inline-block; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; font-size: 1rem; font-weight: 500; text-decoration: none; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+.btn-primary { background-color: var(--primary-color); color: white; }
+.btn-primary:hover { background-color: var(--primary-hover); }
+.btn-logout { background-color: var(--danger-color); color: white; }
+.btn-logout:hover { background-color: #dc2626; }
+.btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
+.btn-full { width: 100%; }
+
+/* --- Forms (Auth & Creation) --- */
+.form-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+.modern-form { background: var(--card-bg); padding: 2.5rem; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); width: 100%; max-width: 480px; }
+.modern-form h2 { font-size: 1.875rem; font-weight: 700; color: var(--secondary-color); text-align: center; margin-bottom: 0.5rem; }
+.modern-form p { text-align: center; color: var(--light-text); margin-bottom: 2rem; }
+.form-group { margin-bottom: 1.5rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--secondary-color); }
+.form-group input, .form-group select { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 0.5rem; box-sizing: border-box; background-color: #fff; }
+.form-group input:focus, .form-group select:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3); }
+.auth-form p { margin-top: 1.5rem; text-align: center; font-size: 0.875rem; }
+.auth-form p a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+
+/* --- Selection Grid (Perks & Choices) --- */
+.selection-header { display: flex; justify-content: space-between; align-items: center; }
+.selection-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.selection-item { background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1rem; text-align: center; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+.selection-item:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.selection-item.selected { background-color: var(--primary-color); color: white; border-color: var(--primary-color); transform: scale(1.05); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+
+/* --- Dashboard --- */
+.main-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; }
+.main-header h1 { font-size: 2.25rem; font-weight: 700; color: var(--secondary-color); }
+.user-info { display: flex; align-items: center; gap: 1rem; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.dashboard-card { background: var(--card-bg); padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); }
+.dashboard-card h2 { margin-top: 0; font-size: 1.25rem; color: var(--primary-color); }
+.saves-section h2 { font-size: 1.5rem; color: var(--secondary-color); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+.saves-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+.save-card { display: block; background: var(--card-bg); padding: 1.5rem; border-radius: 0.75rem; text-decoration: none; color: var(--text-color); box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); transition: all 0.2s ease; }
+.save-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+.save-card h3 { margin: 0 0 0.5rem 0; color: var(--secondary-color); }
+.status-alive { color: var(--success-color); font-weight: 500; }
+.status-dead { color: var(--light-text); font-weight: 500; }
+
+/* --- Life View --- */
+.life-view-container { background: var(--card-bg); padding: 2rem; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+.life-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 2rem; }
+.life-header h1 { font-size: 2rem; color: var(--secondary-color); margin: 0; }
+.header-actions { display: flex; align-items: center; gap: 1rem; }
+.age-badge { background-color: var(--primary-color); color: white; padding: 0.5rem 1rem; border-radius: 999px; font-weight: 500; }
+.life-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; }
+.attributes-panel { background-color: var(--bg-color); padding: 1.5rem; border-radius: 0.75rem; }
+.attributes-panel h3, .attributes-panel h4 { margin-top: 0; margin-bottom: 1rem; color: var(--secondary-color); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+.attributes-panel h4 { margin-top: 1.5rem; }
+.attribute-item { display: flex; justify-content: space-between; margin-bottom: 0.75rem; }
+.attribute-item .value { font-weight: 700; }
+.attribute-item .score-value { color: var(--primary-color); font-size: 1.25rem; }
+.attributes-list hr { border: none; height: 1px; background-color: var(--border-color); margin: 1rem 0; }
+.perks-list, .achievements-list { list-style: none; padding: 0; }
+.perks-list li, .achievements-list li { margin-bottom: 0.5rem; }
+.end-life-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+.end-life-section p { font-size: 0.875rem; color: var(--light-text); margin-bottom: 1rem; }
+.story-panel h2 { margin-top: 0; }
+.events-log { max-height: 500px; overflow-y: auto; padding-right: 1rem; }
+.event-entry { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); }
+.event-entry:last-child { border-bottom: none; }
+.event-entry h4 { margin: 0 0 0.5rem 0; color: var(--primary-color); }
+.choices-section { margin-top: 2rem; background-color: var(--bg-color); padding: 1.5rem; border-radius: 0.75rem; }
+.choices-section.end-of-life { text-align: center; }
+
+/* --- Leaderboard --- */
+.leaderboard-container { background: var(--card-bg); padding: 2rem; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
+.leaderboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+.leaderboard-table { width: 100%; border-collapse: collapse; }
+.leaderboard-table th, .leaderboard-table td { padding: 0.75rem 1rem; text-align: left; }
+.leaderboard-table thead tr { background-color: var(--bg-color); }
+.leaderboard-table th { font-weight: 500; color: var(--light-text); text-transform: uppercase; font-size: 0.75rem; }
+.leaderboard-table tbody tr { border-bottom: 1px solid var(--border-color); }
+.leaderboard-table tbody tr:last-child { border-bottom: none; }
+
+/* --- Flash Messages --- */
+.flashes { list-style: none; padding: 0; margin: 0 auto 1.5rem auto; max-width: 500px; }
+.alert { padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; color: #fff; text-align: center; }
+.alert-success { background-color: var(--success-color); }
+.alert-danger { background-color: var(--danger-color); }
+.alert-warning { background-color: var(--warning-color); color: var(--secondary-color); }
+.alert-info { background-color: var(--info-color); }

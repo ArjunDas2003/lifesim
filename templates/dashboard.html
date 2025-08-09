@@ -1,0 +1,61 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="main-container">
+    <header class="main-header">
+        <h1>Life Simulator</h1>
+        <div class="user-info">
+            <span>Welcome, {{ current_user.username }}!</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+        <!-- Card for creating a new life -->
+        <div class="dashboard-card create-life-card">
+            <h2>New Life</h2>
+            <p>Your journey awaits. Begin a new life from scratch and see where your choices take you.</p>
+            <a href="{{ url_for('create_character') }}" class="btn btn-primary">Create a New Character</a>
+        </div>
+
+        <!-- Card for the leaderboard -->
+        <div class="dashboard-card leaderboard-link-card">
+            <h2>Leaderboard</h2>
+            <p>See how your completed lives rank against others on the global leaderboard.</p>
+            <a href="{{ url_for('leaderboard') }}" class="btn">View Global Rankings</a>
+        </div>
+    </div>
+
+    <!-- Section for active lives -->
+    {% if active_characters %}
+    <div class="saves-section">
+        <h2>Continue a Life</h2>
+        <div class="saves-grid">
+            {% for char in active_characters %}
+            <a href="{{ url_for('life_view', character_id=char.id) }}" class="save-card">
+                <h3>{{ char.name }}</h3>
+                <p>Age: {{ char.age }}</p>
+                <span class="status-alive">● Alive</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Section for completed lives -->
+    {% if completed_characters %}
+    <div class="saves-section">
+        <h2>Review Completed Lives</h2>
+        <div class="saves-grid">
+            {% for char in completed_characters %}
+            <a href="{{ url_for('life_view', character_id=char.id) }}" class="save-card">
+                <h3>{{ char.name }}</h3>
+                <p>Age at death: {{ char.age }}</p>
+                <span class="status-dead">● Deceased</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

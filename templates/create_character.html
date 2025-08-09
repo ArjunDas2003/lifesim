@@ -1,0 +1,85 @@
+<!-- templates/create_character.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container">
+    <form method="POST" action="{{ url_for('create_character') }}" id="creationForm" class="modern-form">
+        <h2>Create Your Character</h2>
+        <p>Define your character's identity and choose the perks that will shape their destiny.</p>
+        
+        <div class="form-group">
+            <label for="name">Character Name</label>
+            <input type="text" id="name" name="name" required placeholder="e.g., Alex Ryder">
+        </div>
+        
+        <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Non-binary">Non-binary</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <div class="selection-header">
+                <label>Choose 3 Perks</label>
+                <a href="{{ url_for('create_character') }}" class="btn btn-sm">Randomize</a>
+            </div>
+            <div class="selection-grid" id="perksGrid">
+                {% for perk in perks %}
+                <div class="selection-item" data-value="{{ perk }}">{{ perk }}</div>
+                {% endfor %}
+            </div>
+            <!-- Hidden inputs will be populated by JS -->
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-full">Start Life</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('creationForm');
+    const grid = document.getElementById('perksGrid');
+    const items = grid.querySelectorAll('.selection-item');
+    const maxSelections = 3;
+
+    grid.addEventListener('click', function(event) {
+        if (event.target.classList.contains('selection-item')) {
+            const selectedItems = grid.querySelectorAll('.selection-item.selected');
+            
+            if (event.target.classList.contains('selected')) {
+                event.target.classList.remove('selected');
+            } else {
+                if (selectedItems.length < maxSelections) {
+                    event.target.classList.add('selected');
+                } else {
+                    alert(`You can only select up to ${maxSelections} perks.`);
+                }
+            }
+        }
+    });
+
+    form.addEventListener('submit', function(event) {
+        // Clear previous hidden inputs
+        form.querySelectorAll('input[name="perks"]').forEach(input => input.remove());
+
+        const selectedItems = grid.querySelectorAll('.selection-item.selected');
+        
+        if (selectedItems.length !== maxSelections) {
+            alert(`Please select exactly ${maxSelections} perks.`);
+            event.preventDefault();
+            return;
+        }
+
+        selectedItems.forEach(item => {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'perks';
+            hiddenInput.value = item.dataset.value;
+            form.appendChild(hiddenInput);
+        });
+    });
+});
+</script>
+{% endblock %}
