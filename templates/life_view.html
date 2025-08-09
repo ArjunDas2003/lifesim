@@ -1,4 +1,3 @@
-<!-- templates/life_view.html -->
 {% extends "base.html" %}
 {% block content %}
 <style>
@@ -503,6 +502,76 @@
         }
     }
 
+    /* ===== Simulation Pop-up Styles ===== */
+    .simulation-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .simulation-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .simulation-popup {
+        background: var(--card-bg);
+        padding: 40px;
+        border-radius: var(--radius-large);
+        text-align: center;
+        box-shadow: var(--shadow-large);
+        transform: scale(0.9);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .simulation-overlay.visible .simulation-popup {
+        transform: scale(1);
+    }
+
+    .simulation-popup h3 {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin: 0 0 24px 0;
+    }
+
+    .age-animation {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .age-icon {
+        font-size: 4rem;
+        opacity: 0;
+        animation: ageFade 2.5s infinite linear;
+    }
+    
+    .age-icon:nth-child(2) {
+        animation-delay: 0.8s;
+    }
+    
+    .age-icon:nth-child(3) {
+        animation-delay: 1.6s;
+    }
+
+    @keyframes ageFade {
+        0%, 100% { opacity: 0; transform: scale(0.8); }
+        20%, 60% { opacity: 1; transform: scale(1); }
+        80% { opacity: 0; transform: scale(0.8); }
+    }
+
     /* ===== Responsive Design ===== */
     @media (max-width: 1024px) {
         .life-layout {
@@ -651,12 +720,25 @@
             {% endif %}
         </main>
     </div>
+
+    <div class="simulation-overlay" id="simulationOverlay">
+        <div class="simulation-popup">
+            <h3>Simulating the year...</h3>
+            <div class="age-animation">
+                <div class="age-icon">👶</div>
+                <div class="age-icon">🧑</div>
+                <div class="age-icon">🧓</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Script for choice selection
     const choicesForm = document.getElementById('choicesForm');
+    const simulationOverlay = document.getElementById('simulationOverlay');
+
     if (choicesForm) {
         const grid = document.getElementById('choicesGrid');
         const maxSelections = 3;
@@ -677,15 +759,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         choicesForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting immediately
+
+            // Clear any previously added hidden inputs
             choicesForm.querySelectorAll('input[name="choices"]').forEach(input => input.remove());
             const selectedItems = grid.querySelectorAll('.selection-item.selected');
             
             if (selectedItems.length === 0) {
                 alert('You must make at least one choice to continue.');
-                event.preventDefault();
                 return;
             }
 
+            // Add selected choices as hidden inputs
             selectedItems.forEach(item => {
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
@@ -693,6 +778,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 hiddenInput.value = item.dataset.value;
                 choicesForm.appendChild(hiddenInput);
             });
+
+            // Show the simulation pop-up
+            if (simulationOverlay) {
+                simulationOverlay.classList.add('visible');
+            }
+
+            // Wait for the animation to play, then submit the form
+            setTimeout(() => {
+                choicesForm.submit();
+            }, 2500); // 2.5 seconds delay
         });
     }
 
