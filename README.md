@@ -128,8 +128,3 @@ Made with ❤️ at TinkerHub Useless Projects
 ![Static Badge](https://img.shields.io/badge/UselessProjects--25-25?link=https%3A%2F%2Fwww.tinkerhub.org%2Fevents%2FQ2Q1TQKX6Q%2FUseless%2520Projects)
 
 ```
-
----
-
-Do you want me to now **upgrade this with emojis, better headings, and collapsible sections** so it looks *really* attractive for GitHub judges? That would make it pop visually.
-```
